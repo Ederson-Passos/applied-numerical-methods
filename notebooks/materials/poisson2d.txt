@@ -1,0 +1,75 @@
+import numpy as np
+from scipy.linalg import solve_banded
+
+
+# malha
+n = 11
+h = 1/(n-1)
+
+xx = np.linspace(0, 1, n)
+yy = np.linspace(0, 1, n)
+
+# fonte
+def f(x,y):
+    return 2 * np.pi**2 * np.sin(np.pi*x) * np.sin(np.pi*y)
+
+# sistema discreto
+upper = lower = n-2
+ab = np.zeros((upper+lower+1, (n-2)**2))
+b = np.empty((n-2)**2)
+
+# índice no formato banda
+def ind(k, l):
+    return upper + k - l, l
+
+for j in np.arange(2,n):
+    for i in np.arange(2,n):
+
+        # enumeração dos nodos computacionais
+        k = i-2 + (j-2)*(n-2)
+
+        # vetor b
+        b[k] = h**2 * f(xx[i-1], yy[j-1])
+
+        # matriz ab
+        ab[ind(k,k)] = 4.
+
+        if (j == 2):
+            if (i == 2):
+                ab[ind(k,k+1)] = -1.
+                ab[ind(k,k+n-2)] = -1.
+            elif (i <= n-2):
+                ab[ind(k,k-1)] = -1.
+                ab[ind(k,k+1)] = -1.
+                ab[ind(k,k+n-2)] = -1.
+            else: # i == n-1
+                ab[ind(k,k-1)] = -1.
+                ab[ind(k,k+n-2)] = -1.
+        elif (j <= n-2):
+            if (i == 2):
+                ab[ind(k,k-(n-2))] = -1.
+                ab[ind(k,k+1)] = -1.
+                ab[ind(k,k+n-2)] = -1.
+            elif (i <= n-2):
+                ab[ind(k,k-1)] = -1.
+                ab[ind(k,k-(n-2))] = -1.
+                ab[ind(k,k+1)] = -1.
+                ab[ind(k,k+n-2)] = -1.
+            else: # i == n-1
+                ab[ind(k,k-1)] = -1.
+                ab[ind(k,k-(n-2))] = -1.
+                ab[ind(k,k+n-2)] = -1.
+        else: # j == n-1
+            if (i == 2):
+                ab[ind(k,k-(n-2))] = -1.
+                ab[ind(k,k+1)] = -1.
+            elif (i <= n-2):
+                ab[ind(k,k-1)] = -1.
+                ab[ind(k,k-(n-2))] = -1.
+                ab[ind(k,k+1)] = -1.
+            else: # i == n-1
+                ab[ind(k,k-1)] = -1.
+                ab[ind(k,k-(n-2))] = -1.
+
+# resolve
+u = solve_banded((lower, upper), ab, b)
