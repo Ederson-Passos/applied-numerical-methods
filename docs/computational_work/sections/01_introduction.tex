@@ -1,0 +1,42 @@
+\section{Introduction}
+\subsection{Application setup}
+
+This work proposes a controlled numerical investigation of sparse
+linear systems arising from the semi-implicit discretization of the
+two-dimensional linearized shallow water equations. The objective
+is not to develop a full oceanographic simulation, but to use this
+model as a test case for studying the conditioning of linear systems
+and the convergence of iterative solvers.
+
+A semi-implicit finite-difference formulation will be adopted,
+following the approaches discussed by Casulli (1990) and
+Bonaventura and Rosatti (2002). Such formulations lead to sparse
+linear systems that must be solved at each time step.
+
+The experiments will consider a rectangular computational domain,
+starting with a constant reference water depth. A second set of
+experiments will introduce controlled spatial variations in the
+depth coefficient. The investigation will examine how grid refinement
+and increasing coefficient contrast affect the resulting matrix,
+the number of iterations required for convergence, and the
+computational cost of the solution process.
+
+As a methodological extension, the work will compare the Conjugate
+Gradient method without preconditioning with preconditioned variants
+using Jacobi and incomplete Cholesky preconditioners. The applicability
+of Conjugate Gradient will first be verified by checking the symmetry
+and positive definiteness of the discrete system. This comparison
+is motivated by the established literature on iterative methods for
+sparse linear systems and preconditioning techniques
+\cite{saad2003,benzi2002}.
+
+The evaluation will consider iteration counts, computational time,
+relative residual norms, and estimates of the condition number,
+where computationally feasible. Solver tolerances and other
+experimental settings will be controlled to enable meaningful
+comparisons across grid resolutions and coefficient configurations.
+
+The main research question is how grid refinement and coefficient
+heterogeneity affect iterative convergence, and to what extent
+incomplete Cholesky preconditioning can improve solver performance
+relative to the unpreconditioned and Jacobi-preconditioned methods.
