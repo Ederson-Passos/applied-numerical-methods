@@ -1,0 +1,33 @@
+\begin{abstract}
+    This work proposes a controlled numerical study of sparse linear
+    systems arising from a semi-implicit finite-difference
+    discretization of the two-dimensional linearized shallow water
+    equations. Rather than developing a full oceanographic simulation,
+    the equations are used as a model problem to investigate how
+    spatial resolution and variations in water depth affect the
+    conditioning of the discrete system and the convergence of
+    iterative solvers.
+
+    The experiments will consider a constant-depth configuration
+    and spatially heterogeneous depth profiles with controlled
+    coefficient contrast. The Conjugate Gradient method without
+    preconditioning will be compared with Jacobi-preconditioned
+    and incomplete-Cholesky-preconditioned variants, provided that
+    the resulting matrix is verified to be symmetric positive
+    definite. The evaluation will consider iteration counts,
+    relative residual norms, estimated condition numbers, and
+    computational time. Preconditioner setup costs and the potential
+    reuse of preconditioners across successive time steps will also
+    be investigated.
+
+    The methodological contribution is a controlled, cost-aware
+    comparison of these solver strategies across different grid
+    resolutions and coefficient configurations. The study aims to
+    identify the conditions under which preconditioning improves
+    overall computational performance, rather than assessing its
+    effectiveness solely through iteration counts.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Shallow water equations;
+semi-implicit discretization; sparse linear systems;
+iterative solvers; preconditioning.

@@ -1,42 +1,174 @@
 \section{Introduction}
+
 \subsection{Application setup}
 
-This work proposes a controlled numerical investigation of sparse
-linear systems arising from the semi-implicit discretization of the
-two-dimensional linearized shallow water equations. The objective
-is not to develop a full oceanographic simulation, but to use this
-model as a test case for studying the conditioning of linear systems
-and the convergence of iterative solvers.
+This work investigates the numerical properties of sparse linear
+systems arising from the semi-implicit discretization of the
+two-dimensional linearized shallow water equations. The shallow
+water model is a depth-averaged approximation of fluid dynamics
+that is applicable when the horizontal length scales are much
+larger than the vertical depth. It describes the evolution of
+the free-surface elevation and the depth-averaged horizontal
+velocity, making it a useful model for studying wave propagation
+in coastal and oceanographic settings
+\cite{casulli1990,chopra2025}.
 
-A semi-implicit finite-difference formulation will be adopted,
-following the approaches discussed by Casulli \cite{casulli1990} and
-Bonaventura and Rosatti \cite{bonaventura2002}. Such formulations lead to sparse
-linear systems that must be solved at each time step.
+Let $\Omega\subset\mathbb{R}^2$ be a rectangular computational
+domain, and let $t\geq 0$ denote time. The variables
+$\eta(x,y,t)$ and $\mathbf{u}(x,y,t)=(u,v)^\top$ represent,
+respectively, the free-surface displacement relative to a resting
+state and the depth-averaged horizontal velocity. The function
+$H(x,y)>0$ denotes the undisturbed water depth, $g$ is the
+gravitational acceleration, and $f$ is a constant Coriolis
+parameter.
 
-The experiments will consider a rectangular computational domain,
-starting with a constant reference water depth. A second set of
-experiments will introduce controlled spatial variations in the
-depth coefficient. The investigation will examine how grid refinement
-and increasing coefficient contrast affect the resulting matrix,
-the number of iterations required for convergence, and the
-computational cost of the solution process.
+Under a linearization about a resting state, neglecting nonlinear
+advection and friction, the governing equations are
+\begin{align}
+    \frac{\partial \eta}{\partial t}
+    + \nabla\cdot(H\mathbf{u})    & = 0,
+    \label{eq:swe_continuity}
+    \\
+    \frac{\partial \mathbf{u}}{\partial t}
+    + g\nabla\eta
+    + f\mathbf{k}\times\mathbf{u} & = 0,
+    \label{eq:swe_momentum}
+\end{align}
+where $\mathbf{k}$ denotes the vertical unit vector.
 
-As a methodological extension, the work will compare the Conjugate
-Gradient method without preconditioning with preconditioned variants
-using Jacobi and incomplete Cholesky preconditioners. The applicability
-of Conjugate Gradient will first be verified by checking the symmetry
-and positive definiteness of the discrete system. This comparison
-is motivated by the established literature on iterative methods for
-sparse linear systems and preconditioning techniques
-\cite{saad2003,benzi2002}.
+The first equation expresses conservation of mass, while the
+second describes the linearized horizontal momentum balance.
+The simplified model isolates the gravity-wave dynamics and
+provides a controlled setting in which the algebraic properties
+of the numerical discretization can be studied independently
+of a full nonlinear oceanographic simulation.
 
-The evaluation will consider iteration counts, computational time,
-relative residual norms, and estimates of the condition number,
-where computationally feasible. Solver tolerances and other
-experimental settings will be controlled to enable meaningful
-comparisons across grid resolutions and coefficient configurations.
+The initial experiments will use a periodic rectangular domain.
+A constant reference depth, $H(x,y)=H_0$, will provide the
+baseline configuration. Subsequently, spatially heterogeneous
+depth profiles will be introduced while maintaining
+$H(x,y)>0$. Recent studies on shallow water models and
+structure-preserving numerical formulations provide additional
+context for these modeling and discretization choices
+\cite{cardosoribeiro2024,chopra2025}.
 
-The main research question is how grid refinement and coefficient
-heterogeneity affect iterative convergence, and to what extent
-incomplete Cholesky preconditioning can improve solver performance
-relative to the unpreconditioned and Jacobi-preconditioned methods.
+The spatial discretization will be based on finite differences
+in conservative flux form. For the temporal discretization, the
+gravity-wave terms will be treated implicitly, while the Coriolis
+term will initially be treated explicitly. This semi-implicit
+strategy couples the unknown free-surface elevation at the new
+time level to the unknown velocity at that same level.
+
+Writing $\Delta t$ for the time step and using superscripts
+$n$ and $n+1$ for consecutive time levels, the discrete equations
+are
+\begin{align}
+    \frac{\eta^{n+1}-\eta^n}{\Delta t}
+    + \nabla_h\cdot(H\mathbf{u}^{n+1}) & = 0,
+    \label{eq:discrete_continuity}
+    \\
+    \frac{\mathbf{u}^{n+1}-\mathbf{u}^n}{\Delta t}
+    + g\nabla_h\eta^{n+1}
+    + f\mathbf{k}\times\mathbf{u}^{n}  & = 0,
+    \label{eq:discrete_momentum}
+\end{align}
+where $\nabla_h$ and $\nabla_h\cdot$ denote the discrete gradient
+and divergence operators.
+
+Eliminating the new velocity from these equations leads to a
+linear system for the free-surface elevation:
+\begin{equation}
+    A_h\eta^{n+1}=b_h^n,
+    \label{eq:linear_system}
+\end{equation}
+where
+\begin{equation}
+    A_h =
+    I-g\Delta t^2
+    \nabla_h\cdot\bigl(H\nabla_h\bigr).
+    \label{eq:discrete_operator}
+\end{equation}
+Here, $I$ is the identity operator and $b_h^n$ is determined by
+the solution at the previous time level.
+
+The matrix representation of $A_h$ is sparse because the
+finite-difference operators couple each grid point only to a
+small number of neighboring points. This sparsity makes the
+problem suitable for iterative linear solvers.
+
+A compatible flux-form discretization will be selected so that
+the resulting matrix is symmetric positive definite under the
+adopted boundary conditions. In particular, if the discrete
+divergence and gradient operators are negative adjoints and
+$H$ is represented by a positive diagonal matrix $H_h$, then
+\begin{equation}
+    A_h =
+    I+g\Delta t^2 G_h^\top H_hG_h,
+    \label{eq:spd_operator}
+\end{equation}
+where $G_h$ is the discrete gradient matrix. This representation
+provides a mathematical basis for investigating the Conjugate
+Gradient method. Symmetry and positive definiteness will be
+verified for the implemented system before this method is used.
+
+The classical semi-implicit shallow water formulation of
+Casulli \cite{casulli1990} and the conjugate-gradient approach
+studied by Bonaventura and Rosatti \cite{bonaventura2002}
+provide the principal methodological foundations for this
+part of the work.
+
+The experiments will investigate two main factors: spatial
+resolution and coefficient heterogeneity. First, the grid will be
+progressively refined while the time step and the remaining
+parameters are held fixed. This experiment will examine how
+the dimension and spectral properties of $A_h$
+change with spatial resolution.
+
+Second, the depth coefficient will be varied while the grid and
+time step remain fixed. The heterogeneity will be quantified by
+the contrast ratio
+\begin{equation}
+    \chi=\frac{H_{\max}}{H_{\min}},
+\end{equation}
+where $H_{\min}>0$. This experiment will investigate whether
+changes in coefficient contrast are associated with changes
+in the conditioning of the matrix and the convergence behavior
+of the iterative solvers.
+
+The principal methods to be compared are the unpreconditioned
+Conjugate Gradient method, Jacobi-preconditioned Conjugate
+Gradient, and incomplete-Cholesky-preconditioned Conjugate
+Gradient. The choice of these methods is motivated by the
+literature on iterative methods for sparse linear systems and
+preconditioning techniques \cite{saad2003,benzi2002}. More
+recent research also investigates advanced preconditioning
+strategies for hyperbolic PDE systems, including numerical
+experiments involving shallow water equations
+\cite{krzysik2025}.
+
+The evaluation will record the iteration count, relative residual
+norm, estimated condition number, and computational time.
+Preconditioner construction time and solution time will be
+reported separately. Since the coefficient matrix remains
+unchanged across time steps when the grid, depth profile, and
+time step are fixed, the study will also examine the effect of
+reusing a preconditioner across repeated linear solves.
+
+This cost-aware comparison constitutes the principal
+methodological extension of the work: rather than evaluating
+preconditioners only by their iteration counts, it will examine
+when the reduction in solution cost compensates for the
+additional setup cost. The implementation will use consistent
+stopping tolerances and initial guesses to ensure meaningful
+comparisons.
+
+The main research question is therefore:
+
+\begin{quote}
+    How do spatial refinement and depth-coefficient heterogeneity
+    affect the conditioning and iterative convergence of sparse
+    linear systems arising from the semi-implicit shallow water
+    equations, and under what conditions does incomplete Cholesky
+    preconditioning provide a computational advantage over
+    unpreconditioned and Jacobi-preconditioned Conjugate Gradient?
+\end{quote}
