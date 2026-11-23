@@ -302,13 +302,15 @@ def build_figure():
 
     # -----------------------------------------------------------------------
     # 3. Shaded 3D Elongated Horizontal Cone Mantle (t from 0 to T_MAX)
+    #    Warm Golden-Amber / Ochre Space-Time Palette (contrasting with blue water slices)
     # -----------------------------------------------------------------------
     n_t, n_th = 36, 72
     t_grid = np.linspace(0, T_MAX, n_t)
     th_grid = np.linspace(0, 2 * np.pi, n_th)
     cone_cmap = LinearSegmentedColormap.from_list(
-        "tufte_cone_horiz", ["#6E9FBE", "#A8CBE0", "#E6F2F8"]
+        "tufte_spacetime_amber", ["#B89768", "#DEC69E", "#F5EBDC"]
     )
+    cone_mantle_edge = "#6B5233"  # Warm sepia-umber for temporal cone generator rays
 
     for i in range(n_t - 1):
         t0_c, t1_c = t_grid[i], t_grid[i + 1]
@@ -336,7 +338,7 @@ def build_figure():
             # Front half (x > 0, cos(th_mid) > 0) vs back half
             is_front = np.cos(th_mid) > -0.15
             z_ord = 13 if is_front else 6
-            f_alpha = 0.27 if is_front else 0.21
+            f_alpha = 0.30 if is_front else 0.22
             ax.add_patch(Polygon(
                 list(zip(X2, Y2)), facecolor=col, edgecolor="none",
                 alpha=f_alpha, zorder=z_ord
@@ -344,41 +346,70 @@ def build_figure():
 
     # -----------------------------------------------------------------------
     # 4. Stacked Vertical Circular Wave Cross-Sections at t1, t2, t3, t4
+    #    Each circle has the exact same proportional (x, y) Cartesian grid
+    #    as the t = 0 origin plane, clipped analytically inside the circle!
     # -----------------------------------------------------------------------
+    grid_step = 0.70  # Exact same grid spacing as np.linspace(-2.1, 2.1, 7) on t=0 plane
+    grid_lines_vals = np.arange(-3.5, 3.51, grid_step)
+
     for idx_lv, (t_lv, lbl_lv) in enumerate(zip(t_levels, t_labels)):
         r_lv = c_wave * t_lv
-        xc_lv = u_adv * t_lv + r_lv * np.cos(theta)
-        yc_lv = v_adv * t_lv + r_lv * np.sin(theta)
+        cx_lv = u_adv * t_lv
+        cy_lv = v_adv * t_lv
+        xc_lv = cx_lv + r_lv * np.cos(theta)
+        yc_lv = cy_lv + r_lv * np.sin(theta)
         tc_lv = np.full_like(theta, t_lv)
         X_sl, Y_sl = proj_xyt(xc_lv, yc_lv, tc_lv, orig_3d)
 
-        # Translucent vertical circular disc at time t_lv
+        # Translucent blue water spatial disc at time t_lv
         ax.add_patch(Polygon(
             list(zip(X_sl, Y_sl)),
             facecolor=PALETTE["slice_fill"], edgecolor="none",
-            alpha=0.28, zorder=9 + idx_lv * 0.5
+            alpha=0.34, zorder=9 + idx_lv * 0.5
         ))
+
+        # Proportional (x, y) Cartesian grid clipped strictly inside the circle of radius r_lv
+        for gv in grid_lines_vals:
+            # 1) Grid line x = gv (vertical in y, clipped to circle (x - cx_lv)^2 + (y - cy_lv)^2 <= r_lv^2)
+            dx_g = gv - cx_lv
+            if abs(dx_g) < r_lv - 1e-6:
+                half_y = np.sqrt(r_lv ** 2 - dx_g ** 2)
+                y_g0, y_g1 = cy_lv - half_y, cy_lv + half_y
+                ax.plot(
+                    *proj_xyt([gv, gv], [y_g0, y_g1], [t_lv, t_lv], orig_3d),
+                    color="#7FA6C0", lw=0.52, alpha=0.68, zorder=9.15 + idx_lv * 0.5
+                )
+            # 2) Grid line y = gv (horizontal in x, clipped to circle)
+            dy_g = gv - cy_lv
+            if abs(dy_g) < r_lv - 1e-6:
+                half_x = np.sqrt(r_lv ** 2 - dy_g ** 2)
+                x_g0, x_g1 = cx_lv - half_x, cx_lv + half_x
+                ax.plot(
+                    *proj_xyt([x_g0, x_g1], [gv, gv], [t_lv, t_lv], orig_3d),
+                    color="#7FA6C0", lw=0.52, alpha=0.68, zorder=9.15 + idx_lv * 0.5
+                )
+
         # Inner concentric ripple rings inside each vertical circular cross-section
         for r_frac in [0.42, 0.72]:
-            xr_i = u_adv * t_lv + (r_frac * r_lv) * np.cos(theta)
-            yr_i = v_adv * t_lv + (r_frac * r_lv) * np.sin(theta)
+            xr_i = cx_lv + (r_frac * r_lv) * np.cos(theta)
+            yr_i = cy_lv + (r_frac * r_lv) * np.sin(theta)
             ax.plot(
                 *proj_xyt(xr_i, yr_i, tc_lv, orig_3d),
-                color=PALETTE["cone_edge"], lw=0.50, alpha=0.42, zorder=9.2 + idx_lv * 0.5
+                color=PALETTE["cone_edge"], lw=0.45, ls=":", alpha=0.42, zorder=9.25 + idx_lv * 0.5
             )
 
         # Outer circumference of the wave circle at t_lv
         ax.plot(
             X_sl, Y_sl,
-            color=PALETTE["cone_edge"], lw=1.30, alpha=0.90, zorder=14
+            color=PALETTE["cone_edge"], lw=1.35, alpha=0.92, zorder=14
         )
 
         # Radial wave celerity vector (measured from the advective centerline!) inside the 3rd & 4th slices
         if idx_lv in (2, 3):
-            p_cent = proj_xyt(u_adv * t_lv, v_adv * t_lv, t_lv, orig_3d)
+            p_cent = proj_xyt(cx_lv, cy_lv, t_lv, orig_3d)
             p_rim_bot = proj_xyt(
-                u_adv * t_lv + r_lv * np.cos(th_min_Y),
-                v_adv * t_lv + r_lv * np.sin(th_min_Y),
+                cx_lv + r_lv * np.cos(th_min_Y),
+                cy_lv + r_lv * np.sin(th_min_Y),
                 t_lv, orig_3d
             )
             ax.plot(p_cent[0], p_cent[1], marker="o", markersize=3.2, color=PALETTE["cone_edge"], zorder=15)
@@ -389,14 +420,14 @@ def build_figure():
             crisp_text(
                 ax, 0.5 * (p_cent[0] + p_rim_bot[0]) + 0.14, 0.5 * (p_cent[1] + p_rim_bot[1]),
                 f"$c\\,{lbl_lv[1:-1]}$",
-                color=PALETTE["cone_edge"], stroke_w=0.16, bg_pill="#D8EBF6",
+                color=PALETTE["cone_edge"], stroke_w=0.16, bg_pill="#DCEBF5",
                 fontsize=8.9, ha="left", va="center", zorder=22
             )
 
         # Time level label placed cleanly below the lowest point of each vertical circle
         p_bot_lv = proj_xyt(
-            u_adv * t_lv + r_lv * np.cos(th_min_Y),
-            v_adv * t_lv + r_lv * np.sin(th_min_Y),
+            cx_lv + r_lv * np.cos(th_min_Y),
+            cy_lv + r_lv * np.sin(th_min_Y),
             t_lv, orig_3d
         )
         # Small vertical tick mark connecting circle bottom to time label
@@ -411,7 +442,7 @@ def build_figure():
             fontsize=9.2, ha="center", va="top", linespacing=1.25, zorder=25
         )
 
-    # Open right mouth of the cone at t = T_MAX
+    # Open right mouth of the temporal cone at t = T_MAX
     r_top = c_wave * T_MAX
     xc_top = u_adv * T_MAX + r_top * np.cos(theta)
     yc_top = v_adv * T_MAX + r_top * np.sin(theta)
@@ -419,22 +450,22 @@ def build_figure():
     X_top, Y_top = proj_xyt(xc_top, yc_top, tc_top, orig_3d)
     ax.add_patch(Polygon(
         list(zip(X_top, Y_top)),
-        facecolor="#D8EBF6", edgecolor=PALETTE["cone_edge"],
-        lw=1.55, alpha=0.38, zorder=14.5
+        facecolor="#F2E6D4", edgecolor=cone_mantle_edge,
+        lw=1.40, alpha=0.26, zorder=14.5
     ))
 
     # Exact outer 2D silhouette generator rays (th_sil_top and th_sil_bot) + internal characteristic ribs
     for th_ray, lw_r, al_r in [
-        (th_sil_top, 1.80, 0.96),
-        (th_sil_bot, 1.80, 0.96),
-        (0.0, 0.72, 0.52),
+        (th_sil_top, 1.80, 0.95),
+        (th_sil_bot, 1.80, 0.95),
+        (0.0, 0.72, 0.50),
         (np.pi, 0.60, 0.35),
     ]:
         x_ray = u_adv * T_MAX + r_top * np.cos(th_ray)
         y_ray = v_adv * T_MAX + r_top * np.sin(th_ray)
         ax.plot(
             *proj_xyt([0, x_ray], [0, y_ray], [0, T_MAX], orig_3d),
-            color=PALETTE["cone_edge"], lw=lw_r, alpha=al_r, zorder=15
+            color=cone_mantle_edge, lw=lw_r, alpha=al_r, zorder=15
         )
 
     # Origin Perturbation Point (0, 0, 0)
@@ -543,7 +574,7 @@ def build_figure():
     crisp_text(
         ax, p_int[0], p_int[1],
         "Interior do cone:\nregião alcançada pela perturbação\n" + r"($\mathrm{raio} \leq c\,t$, com $c = \sqrt{gH}$)",
-        color=PALETTE["cone_edge"], stroke_w=0.15, bg_pill="#E3F1F8",
+        color="#4E3A21", stroke_w=0.15, bg_pill="#F5ECE0",
         fontsize=9.0, fontstyle="italic", ha="center", va="center",
         linespacing=1.30, zorder=25
     )
@@ -598,7 +629,7 @@ def build_figure():
             "demarca a fronteira física até onde a informação",
             "da perturbação conseguiu chegar no espaço-tempo."
         ],
-        title_color=PALETTE["cone_edge"],
+        title_color="#5C4428",
         align="left",
         rad=0.14
     )
