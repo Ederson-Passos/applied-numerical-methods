@@ -348,7 +348,7 @@ def build_figure():
     # Concise direct labels on the wave profiles
     crisp_text(
         ax, xc_wave - 0.58, y_top_ex - 0.05,
-        "Frente física real\n(nítida, preservada pelo ELM)",
+        "Frente física real\n(nitidez melhor preservada pelo ELM)",
         color=PALETTE["z_node"], stroke_w=0.16,
         fontsize=8.4, fontweight="bold", ha="right", va="top", linespacing=1.18, zorder=22
     )
@@ -361,7 +361,7 @@ def build_figure():
 
     crisp_text(
         ax, xc_L, y_wbase - 0.25,
-        r"Erro de 1ª ordem introduz viscosidade artificial $\;\propto \Delta x\,\dfrac{\partial^2 u}{\partial x^2}\;$ que achata picos e frentes",
+        r"Erro de 1ª ordem introduz viscosidade artificial $\;\propto |u|\,\Delta x\,\dfrac{\partial^2 u}{\partial x^2}\;$ que achata picos e frentes",
         color=PALETTE["ink_secondary"], stroke_w=0.13,
         fontsize=8.4, fontstyle="italic", ha="center", va="top", zorder=22
     )
