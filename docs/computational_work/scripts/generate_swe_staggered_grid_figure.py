@@ -771,19 +771,19 @@ def build_figure():
         fontsize=8.3, ha="left", va="top", linespacing=1.24, zorder=25
     )
 
-    # Note 2: Velocidade horizontal u nas faces verticais
+    # Note 2: Velocidade na direção x (u) nas faces verticais
     ax.plot(x_notes_R, -2.05, marker="s", markersize=6.2,
             markerfacecolor=PALETTE["u_node"], markeredgecolor="white", markeredgewidth=1.0, zorder=25)
     crisp_text(
         ax, x_notes_R + 0.22, -2.05,
-        r"Velocidade $u_{i+1/2, j}$ nas faces verticais:",
+        r"Velocidade na direção $x$ ($u_{i+1/2, j}$):",
         color=PALETTE["u_node"], stroke_w=0.18,
         fontsize=9.2, fontweight="bold", ha="left", va="center", zorder=25
     )
     crisp_text(
         ax, x_notes_R + 0.22, -2.24,
-        r"Fica exatamente entre $z_{i,j}$ e $z_{i+1,j}$;" + "\n"
-        + r"usa células adjacentes sem ponto cego:",
+        r"Avaliada nas faces verticais (leste/oeste)," + "\n"
+        + r"exatamente entre $z_{i,j}$ e $z_{i+1,j}$:",
         color=PALETTE["ink_secondary"], stroke_w=0.13,
         fontsize=8.3, ha="left", va="top", linespacing=1.22, zorder=25
     )
@@ -794,19 +794,19 @@ def build_figure():
         fontsize=8.8, ha="left", va="top", zorder=25
     )
 
-    # Note 3: Velocidade vertical v nas faces horizontais
+    # Note 3: Velocidade na direção y (v) nas faces horizontais
     ax.plot(x_notes_R, -3.55, marker="D", markersize=6.0,
             markerfacecolor=PALETTE["v_node"], markeredgecolor="white", markeredgewidth=1.0, zorder=25)
     crisp_text(
         ax, x_notes_R + 0.22, -3.55,
-        r"Velocidade $v_{i, j+1/2}$ nas faces horizontais:",
+        r"Velocidade na direção $y$ ($v_{i, j+1/2}$):",
         color=PALETTE["v_node"], stroke_w=0.18,
         fontsize=9.2, fontweight="bold", ha="left", va="center", zorder=25
     )
     crisp_text(
         ax, x_notes_R + 0.22, -3.74,
-        r"Fica nas faces de cima e de baixo," + "\n"
-        + r"entre os centros $z_{i,j}$ e $z_{i,j+1}$:",
+        r"Avaliada nas faces horizontais (norte/sul)," + "\n"
+        + r"exatamente entre $z_{i,j}$ e $z_{i,j+1}$:",
         color=PALETTE["ink_secondary"], stroke_w=0.13,
         fontsize=8.3, ha="left", va="top", linespacing=1.22, zorder=25
     )
