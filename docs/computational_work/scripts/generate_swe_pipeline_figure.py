@@ -824,15 +824,21 @@ def build_figure():
         fontsize=8.0, fontweight="bold", ha="left", va="center", zorder=20
     )
 
-    # Short vertical arrows descending from FORÇANTES into the linear systems ("entra em b")
-    for x_arr_b in [-1.15, 0.25]:
-        draw_2d_arrow(ax, (x_arr_b, y_fc), (x_arr_b, 2.16),
-                      color=PALETTE["amber_sub"], lw=1.25, mutation_scale=8.5, zorder=22)
+    # Short vertical arrows descending from FORÇANTES into Caminho 1 AND via the OU junction to Caminho 2 ("entra em b")
+    draw_2d_arrow(ax, (-0.85, y_fc), (-0.85, 2.16),
+                  color=PALETTE["amber_sub"], lw=1.25, mutation_scale=8.5, zorder=22)
+    # Branch from FORÇANTES down the left channel into the "OU" junction (feeding Caminho 1 OR Caminho 2!)
+    ax.plot([-2.15, -2.15], [y_fc, 2.40], color=PALETTE["amber_sub"], lw=1.2, ls="--", zorder=20)
+    ax.plot([-2.15, -3.05], [2.40, 2.40], color=PALETTE["amber_sub"], lw=1.2, ls="--", zorder=20)
+    draw_2d_arrow(ax, (-3.05, 2.40), (-3.05, 1.18),
+                  color=PALETTE["amber_sub"], lw=1.25, mutation_scale=8.5, ls="--", zorder=22)
+    ax.plot(-3.05, 1.15, marker="o", markersize=4.2, color=PALETTE["amber_sub"], zorder=25)
+
     crisp_text(
-        ax, -0.45, 2.38,
-        r"entra em $\mathbf{b}$",
+        ax, -1.50, 2.38,
+        r"entra em $\mathbf{b}$ (Caminho 1 ou 2)",
         color=PALETTE["amber_sub"], stroke_w=0.15, bg_clear=True, pad=0.03,
-        fontsize=7.9, fontweight="bold", fontstyle="italic", ha="center", va="center", zorder=24
+        fontsize=7.8, fontweight="bold", fontstyle="italic", ha="center", va="center", zorder=24
     )
 
     # =======================================================================
@@ -872,55 +878,55 @@ def build_figure():
     )
 
     # Step 2A: 1 Global Pentadiagonal Matrix
-    draw_mini_pentadiag(ax, x0=-2.42, y0=0.05, size=1.30, zorder=15)
+    draw_mini_pentadiag(ax, x0=-2.42, y0=0.05, size=1.26, zorder=15)
 
     crisp_text(
-        ax, -0.96, 1.38,
+        ax, -1.02, 1.38,
         r"Etapa 2: Elevação $z^{k+1}$",
         color=PALETTE["u_node"], stroke_w=0.17,
-        fontsize=8.4, fontweight="bold", ha="left", va="center", zorder=22
+        fontsize=8.3, fontweight="bold", ha="left", va="center", zorder=22
     )
     crisp_text(
-        ax, -0.96, 1.02,
+        ax, -1.02, 1.02,
         r"1 Matriz $N \times N$ ($A\,\mathbf{z}^{k+1} = \mathbf{b}$)",
         color=PALETTE["ink_primary"], stroke_w=0.16,
-        fontsize=8.0, fontweight="bold", ha="left", va="center", zorder=22
+        fontsize=7.9, fontweight="bold", ha="left", va="center", zorder=22
     )
     crisp_text(
-        ax, -0.96, 0.45,
+        ax, -1.02, 0.45,
         r"• 5 diagonais (PCG / SOR)" + "\n"
         + r"• Calcula $z_{i,j}^{k+1}$ global",
         color=PALETTE["ink_secondary"], stroke_w=0.13,
-        fontsize=7.8, ha="left", va="center", linespacing=1.25, zorder=22
+        fontsize=7.7, ha="left", va="center", linespacing=1.25, zorder=22
     )
 
     # Orthogonal arrow from Etapa 2 to Etapa 3 inside Upper Branch
-    draw_2d_arrow(ax, (1.02, 0.85), (1.28, 0.85),
+    draw_2d_arrow(ax, (0.90, 0.85), (1.14, 0.85),
                   color=PALETTE["u_node"], lw=1.5, mutation_scale=10, zorder=22)
 
-    # Step 3A: Widened frame below Caminho 1 title with enlarged formula font!
-    draw_drafting_frame(ax, 1.30, -0.08, 3.04, 1.84,
+    # Step 3A: Widened frame [1.16, 4.34] with title strictly inside and crystal-clear + sign in denominator!
+    draw_drafting_frame(ax, 1.16, -0.10, 3.18, 1.88,
                         ec=PALETTE["z_node"], fc="#FFFFFF", lw=0.95, zorder=14)
     crisp_text(
-        ax, 2.82, 1.64,
+        ax, 2.75, 1.66,
         r"Etapa 3: Velocidades ($0$ Matrizes — Conta Direta)",
-        color=PALETTE["z_node"], stroke_w=0.17,
-        fontsize=7.8, fontweight="bold", ha="center", va="top", zorder=22
+        color=PALETTE["z_node"], stroke_w=0.16,
+        fontsize=7.4, fontweight="bold", ha="center", va="top", zorder=22
     )
-    ax.plot([1.40, 4.24], [1.40, 1.40], color=PALETTE["rule_light"], lw=0.65, zorder=15)
+    ax.plot([1.26, 4.24], [1.43, 1.43], color=PALETTE["rule_light"], lw=0.65, zorder=15)
 
-    # Enlarged font (9.3 pt) for the explicit velocity update equations!
+    # Explicit velocity update equations with generous vertical space between fraction bar and (1 + dt*gamma^k)
     crisp_text(
-        ax, 2.82, 0.98,
+        ax, 2.75, 1.04,
         r"$u^{k+1} = \dfrac{F u^k - g\Delta t\,\nabla_x z^{k+1} + \Delta t\,\tau_x}{1 + \Delta t\,\gamma^k}$",
         color=PALETTE["ink_primary"], stroke_w=0.17,
-        fontsize=9.3, ha="center", va="center", zorder=24
+        fontsize=8.8, ha="center", va="center", zorder=24
     )
     crisp_text(
-        ax, 2.82, 0.30,
+        ax, 2.75, 0.28,
         r"$v^{k+1} = \dfrac{F v^k - g\Delta t\,\nabla_y z^{k+1} + \Delta t\,\tau_y}{1 + \Delta t\,\gamma^k}$",
         color=PALETTE["ink_primary"], stroke_w=0.17,
-        fontsize=9.3, ha="center", va="center", zorder=24
+        fontsize=8.8, ha="center", va="center", zorder=24
     )
 
     # -----------------------------------------------------------------------
@@ -1075,13 +1081,13 @@ def build_figure():
     # =======================================================================
     # BLOCK 3 (FAR RIGHT): DECISÃO "t < T_final?" & PRODUTO FINAL — TENSORES
     # =======================================================================
+    # Decision Diamond "t_{k+1} < T_final?"
     cx_dec, cy_dec = 7.75, 0.72
-    rx_d, ry_d = 0.62, 0.46
+    rx_d, ry_d = 0.66, 0.48
 
     draw_2d_arrow(ax, (6.82, cy_dec), (cx_dec - rx_d - 0.02, cy_dec),
                   color=PALETTE["z_node"], lw=1.6, mutation_scale=11, zorder=22)
 
-    # Decision Diamond "t < T_final?"
     diamond_pts = [
         (cx_dec - rx_d, cy_dec),
         (cx_dec, cy_dec + ry_d),
@@ -1095,9 +1101,9 @@ def build_figure():
     ))
     crisp_text(
         ax, cx_dec, cy_dec,
-        r"$t < T_{\mathrm{final}}$?",
+        r"$t_{k+1} < T_{\mathrm{final}}$?",
         color=PALETTE["ink_primary"], stroke_w=0.17,
-        fontsize=8.2, fontweight="bold", ha="center", va="center", zorder=26
+        fontsize=7.9, fontweight="bold", ha="center", va="center", zorder=26
     )
 
     # Branch "Sim" (downward from diamond to the bottom dashed feedback loop k <- k + 1)
