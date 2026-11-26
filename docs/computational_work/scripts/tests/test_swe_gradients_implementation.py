@@ -128,26 +128,3 @@ def test_surface_gradient(*grids, **kwargs):
     test_single_grid_surface_gradient(
         g, surface_gradient_fn=grad_fn, a=a, b=b, c=c
     )
-
-
-if __name__ == "__main__":
-  # Execução direta para autoverificação independente
-  print("Executando teste autônomo de test_swe_gradients_implementation:")
-  for label, (nx, ny, dx, dy) in [
-      ("Grossa", (40, 20, 150.0, 150.0)),
-      ("Fina", (120, 60, 50.0, 50.0)),
-  ]:
-    xc = (np.arange(nx) + 0.5) * dx
-    yc = (np.arange(ny) + 0.5) * dy
-    Xc, Yc = np.meshgrid(xc, yc)
-    mock_g = {
-        "Nx": nx,
-        "Ny": ny,
-        "dx": dx,
-        "dy": dy,
-        "Xc": Xc,
-        "Yc": Yc,
-        "eta": np.zeros((ny, nx)),
-    }
-    print(f"[{label}]", end=" ")
-    test_single_grid_surface_gradient(mock_g)

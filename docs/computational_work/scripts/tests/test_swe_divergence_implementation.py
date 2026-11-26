@@ -217,30 +217,3 @@ def test_surface_divergence(*grids, **kwargs):
     test_single_grid_divergence(
         g, qx=qx, qy=qy, a=a, b=b, divergence_fn=div_fn
     )
-
-
-if __name__ == "__main__":
-  # Execução direta para autoverificação autônoma no terminal
-  print("Executando teste autônomo de test_swe_divergence_implementation:")
-  for label, (nx, ny, dx, dy) in [
-      ("Grossa", (40, 20, 150.0, 150.0)),
-      ("Fina", (120, 60, 50.0, 50.0)),
-  ]:
-    xc = (np.arange(nx) + 0.5) * dx
-    yc = (np.arange(ny) + 0.5) * dy
-    xf = np.arange(nx + 1) * dx
-    yf = np.arange(ny + 1) * dy
-    mock_g = {
-        "Nx": nx,
-        "Ny": ny,
-        "dx": dx,
-        "dy": dy,
-        "Xc": np.meshgrid(xc, yc)[0],
-        "Yc": np.meshgrid(xc, yc)[1],
-        "Xu": np.meshgrid(xf, yc)[0],
-        "Yu": np.meshgrid(xf, yc)[1],
-        "Xv": np.meshgrid(xc, yf)[0],
-        "Yv": np.meshgrid(xc, yf)[1],
-    }
-    print(f"[{label}]", end=" ")
-    test_single_grid_divergence(mock_g)
